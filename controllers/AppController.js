@@ -5,7 +5,7 @@ class AppController {
   static getStatus(req, res) {
     res.status(200).send({
       redis: redisClient.isAlive(),
-      stats: dbClient.isAlive(),
+      db: dbClient.isAlive(),
     });
   }
 

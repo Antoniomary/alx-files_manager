@@ -29,7 +29,7 @@ class AuthController {
     });
 
     if (!user) {
-      return res.status(401).send('Unauthorized');
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const token = uuidv4();

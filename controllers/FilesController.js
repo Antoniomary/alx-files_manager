@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -13,7 +13,9 @@ class FilesController {
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { name, type, parentId = 0, isPublic = false, data } = req.body;
+    const {
+      name, type, parentId = 0, isPublic = false, data,
+    } = req.body;
     if (!name) return res.status(400).json({ error: 'Missing name' });
     if (!type || !['folder', 'file', 'image'].includes(type)) {
       return res.status(400).json({ error: 'Missing type' });
@@ -25,7 +27,7 @@ class FilesController {
 
     if (parentId !== 0) {
       const parentFile = await dbClient.db.collection('files').findOne({
-        _id: ObjectId(parentId)
+        _id: ObjectId(parentId),
       });
       if (!parentFile) {
         return res.status(400).json({ error: 'Parent not found' });
@@ -64,7 +66,7 @@ class FilesController {
     fileData.localPath = path.join(folderPath, fileName);
 
     const asciiData = Buffer.from(data, 'base64');
-    fs.writeFileSync(fileData.localPath, asciiData); 
+    fs.writeFileSync(fileData.localPath, asciiData);
 
     const newFile = await dbClient.db.collection('files').insertOne(fileData);
 

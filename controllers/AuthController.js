@@ -5,7 +5,7 @@ import redisClient from '../utils/redis';
 
 class AuthController {
   static async getConnect(req, res) {
-    const { authorization } = req.headers.authorization;
+    const authorization = req.headers.authorization;
 
     if (!authorization || !authorization.startsWith('Basic ')) {
       return res.status(401).json({ error: 'Unauthorized' });

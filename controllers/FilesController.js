@@ -154,15 +154,29 @@ class FilesController {
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { id } = req.query;
-    const file = await dbClient.db.collection('files').findOne({
+    const user = await dbClient.db.collection('users').findOne({
+      _id: ObjectId(userId),
+    });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    if (!id) return res.status(401).json({ error: 'Invalid file id' });
+    let file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
 
-    file.isPublic = true;
+    await dbClient.db.collection('files').updateOne({
+      _id: ObjectId(id),
+    }, {
+      $set: { isPublic: true }, 
+    });
 
+    let file = await dbClient.db.collection('files').findOne({
+      _id: ObjectId(id),
+      userId: ObjectId(userId),
+    });
     delete file.localPath;
 
     return res.status(200).json(file);
@@ -175,15 +189,29 @@ class FilesController {
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { id } = req.query;
-    const file = await dbClient.db.collection('files').findOne({
+    const user = await dbClient.db.collection('users').findOne({
+      _id: ObjectId(userId),
+    });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    if (!id) return res.status(401).json({ error: 'Invalid file id' });
+    let file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
 
-    file.isPublic = false;
+    await dbClient.db.collection('files').updateOne({
+      _id: ObjectId(id),
+    }, {
+      $set: { isPublic: false }, 
+    });
 
+    let file = await dbClient.db.collection('files').findOne({
+      _id: ObjectId(id),
+      userId: ObjectId(userId),
+    });
     delete file.localPath;
 
     return res.status(200).json(file);

@@ -154,24 +154,17 @@ class FilesController {
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const user = await dbClient.db.collection('users').findOne({
-      _id: ObjectId(userId),
-    });
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-    const { id } = req.params;
-    if (!id) return res.status(401).json({ error: 'Invalid file id' });
+    const id = req.params.id  || '';
     let file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
 
-    await dbClient.db.collection('files').updateOne({
-      _id: ObjectId(id),
-    }, {
-      $set: { isPublic: true }, 
-    });
+    await dbClient.db.collection('files').updateOne(
+      { _id: ObjectId(id) },
+      { $set: { isPublic: true } },
+    );
 
     file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
@@ -189,24 +182,17 @@ class FilesController {
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const user = await dbClient.db.collection('users').findOne({
-      _id: ObjectId(userId),
-    });
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-    const { id } = req.params;
-    if (!id) return res.status(401).json({ error: 'Invalid file id' });
+    const id = req.params.id  || '';
     let file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
 
-    await dbClient.db.collection('files').updateOne({
-      _id: ObjectId(id),
-    }, {
-      $set: { isPublic: false }, 
-    });
+    await dbClient.db.collection('files').updateOne(
+      { _id: ObjectId(id) },
+      { $set: { isPublic: false } },
+    );
 
     file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),

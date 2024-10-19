@@ -124,9 +124,9 @@ class FilesController {
     const skipItems = page * pageSize;
 
     const aggregationMatch = parentId === '0' ? {
-      userId: userObjectId, parentId: '0'
+      userId: userObjectId, parentId: '0',
     } : {
-      userId: userObjectId, parentId
+      userId: userObjectId, parentId,
     };
 
     const files = await dbClient.db.collection('files').aggregate([
@@ -135,7 +135,7 @@ class FilesController {
       { $limit: pageSize },
     ]).toArray();
 
-    const linkedFiles = files.map(file => ({
+    const linkedFiles = files.map((file) => ({
       id: file._id,
       userId: file.userId,
       name: file.name,

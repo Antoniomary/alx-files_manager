@@ -79,6 +79,73 @@ class FilesController {
       parentId: fileData.parentId,
     });
   }
+
+  static async getShow(req, res) {
+    const token = req.headers['x-token'];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const user = await dbClient.db.collection('users').findOne({
+      _id: ObjectId(userId),
+    });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const fileId = req.params.id;
+    if (!fileId) return res.status(404).json({ error: 'Not found' });
+
+    const file = await dbClient.db.collection('files').findOne({
+      _id: ObjectId(fileId),
+      userId: user._id,
+    });
+    if (!file) return res.status(404).json({ error: 'Not found' });
+
+    delete file.localPath;
+
+    return res.status(200).json(file);
+  }
+
+  static async getIndex(req, res) {
+    const token = req.headers['x-token'];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userObjectId = new ObjectId(userId);
+
+    let parentId = req.query.parentId || '0';
+    if (parentId !== '0') parentId = ObjectId(parentId);
+
+    const page = parseInt(req.query.page, 10) || 0;
+
+    const pageSize = 20;
+    const skipItems = page * pageSize;
+
+    const aggregationMatch = parentId === '0' ? {
+      userId: userObjectId, parentId: '0'
+    } : {
+      userId: userObjectId, parentId
+    };
+
+    const files = await dbClient.db.collection('files').aggregate([
+      { $match: aggregationMatch },
+      { $skip: skipItems },
+      { $limit: pageSize },
+    ]).toArray();
+
+    const linkedFiles = files.map(file => ({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    }));
+
+    return res.status(200).json(linkedFiles);
+  }
 }
 
 export default FilesController;

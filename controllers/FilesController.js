@@ -173,7 +173,7 @@ class FilesController {
       $set: { isPublic: true }, 
     });
 
-    let file = await dbClient.db.collection('files').findOne({
+    file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
@@ -208,7 +208,7 @@ class FilesController {
       $set: { isPublic: false }, 
     });
 
-    let file = await dbClient.db.collection('files').findOne({
+    file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });

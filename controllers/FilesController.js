@@ -182,7 +182,7 @@ class FilesController {
     });
     if (!file) return res.status(404).json({ error: 'Not found' });
 
-    file.isPublic = true;
+    file.isPublic = false;
 
     delete file.localPath;
 

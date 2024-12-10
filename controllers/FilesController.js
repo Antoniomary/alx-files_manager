@@ -170,9 +170,15 @@ class FilesController {
       _id: ObjectId(id),
       userId: ObjectId(userId),
     });
-    delete file.localPath;
 
-    return res.status(200).json(file);
+    return res.status(200).json({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
   }
 
   static async putUnpublish(req, res) {

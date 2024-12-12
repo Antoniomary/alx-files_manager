@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { lookup } from 'mime-types';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
-// import { fileQueue } from '../worker';
+import { fileQueue } from '../worker';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -72,7 +72,6 @@ class FilesController {
 
     const newFile = await dbClient.db.collection('files').insertOne(fileData);
 
-    /*
     if (type === 'image') {
       try {
         await fileQueue.add({ fileId: newFile.insertedId, userId: fileData.userId });
@@ -80,7 +79,6 @@ class FilesController {
         console.log(err);
       }
     }
-    */
 
     return res.status(201).json({
       id: newFile.insertedId,
@@ -229,6 +227,7 @@ class FilesController {
 
   static async getFile(req, res) {
     const id = req.params.id || '';
+    const { size } = req.query;
     const file = await dbClient.db.collection('files').findOne({
       _id: ObjectId(id),
     });
@@ -245,6 +244,8 @@ class FilesController {
     if (file.type === 'folder') {
       return res.status(400).json({ error: 'A folder doesn\'t have content' });
     }
+
+    if (file.type === 'image' && size) file.localPath += `_${size}`;
 
     if (!fs.existsSync(file.localPath)) {
       return res.status(404).json({ error: 'Not found' });

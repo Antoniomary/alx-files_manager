@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { lookup } from 'mime-types';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+// import { fileQueue } from '../worker';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -71,6 +72,16 @@ class FilesController {
 
     const newFile = await dbClient.db.collection('files').insertOne(fileData);
 
+    /*
+    if (type === 'image') {
+      try {
+        await fileQueue.add({ fileId: newFile.insertedId, userId: fileData.userId });
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    */
+
     return res.status(201).json({
       id: newFile.insertedId,
       userId: fileData.userId,
@@ -116,16 +127,16 @@ class FilesController {
 
     const userObjectId = new ObjectId(userId);
 
-    let parentId = req.query.parentId || '0';
-    if (parentId !== '0') parentId = ObjectId(parentId);
+    let parentId = req.query.parentId || 0;
+    if (parentId !== 0) parentId = ObjectId(parentId);
 
     const page = parseInt(req.query.page, 10) || 0;
 
     const pageSize = 20;
     const skipItems = page * pageSize;
 
-    const aggregationMatch = parentId === '0' ? {
-      userId: userObjectId, parentId: '0',
+    const aggregationMatch = parentId === 0 ? {
+      userId: userObjectId, parentId: 0,
     } : {
       userId: userObjectId, parentId,
     };
@@ -229,7 +240,6 @@ class FilesController {
 
     if (!file.isPublic && (!userId || file.userId.toString() !== userId)) {
       return res.status(404).json({ error: 'Not found' });
-      console.log('i am not your problem');
     }
 
     if (file.type === 'folder') {

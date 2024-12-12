@@ -127,16 +127,16 @@ class FilesController {
 
     const userObjectId = new ObjectId(userId);
 
-    let parentId = req.query.parentId || 0;
-    if (parentId !== 0) parentId = ObjectId(parentId);
+    let parentId = req.query.parentId || '0';
+    if (parentId !== '0') parentId = ObjectId(parentId);
 
     const page = parseInt(req.query.page, 10) || 0;
 
     const pageSize = 20;
     const skipItems = page * pageSize;
 
-    const aggregationMatch = parentId === 0 ? {
-      userId: userObjectId, parentId: 0,
+    const aggregationMatch = parentId === '0' ? {
+      userId: userObjectId, parentId: '0',
     } : {
       userId: userObjectId, parentId,
     };
